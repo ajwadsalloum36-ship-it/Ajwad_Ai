@@ -12,97 +12,265 @@
 
     body {
       margin: 0;
+      min-height: 100vh;
       font-family: Arial, sans-serif;
-      background: #0f1115;
+      background: #0d1117;
       color: white;
-      height: 100vh;
       display: flex;
       flex-direction: column;
     }
 
     header {
-      padding: 20px;
+      padding: 22px 16px;
       text-align: center;
-      border-bottom: 1px solid #292d35;
+      border-bottom: 1px solid #30363d;
+      background: #161b22;
     }
 
     header h1 {
       margin: 0;
-      font-size: 26px;
+      font-size: 27px;
     }
 
     header p {
       margin: 7px 0 0;
-      color: #9ca3af;
-      font-size: 14px;
+      color: #8b949e;
     }
 
     #chat {
       flex: 1;
       overflow-y: auto;
-      padding: 20px;
+      padding: 18px;
     }
 
     .message {
       max-width: 85%;
       padding: 12px 15px;
       margin: 10px 0;
-      border-radius: 16px;
-      line-height: 1.6;
+      border-radius: 17px;
+      line-height: 1.7;
       white-space: pre-wrap;
+      word-wrap: break-word;
     }
 
     .ai {
-      background: #1d232d;
+      background: #21262d;
       margin-left: auto;
     }
 
     .user {
-      background: #2563eb;
+      background: #238636;
       margin-right: auto;
     }
 
-    .bottom {
-      padding: 12px;
-      border-top: 1px solid #292d35;
+    .input-area {
       display: flex;
       gap: 8px;
+      padding: 12px;
+      background: #161b22;
+      border-top: 1px solid #30363d;
     }
 
-    input {
+    #input {
       flex: 1;
+      min-width: 0;
       padding: 14px;
-      border-radius: 14px;
-      border: none;
+      border: 1px solid #30363d;
+      border-radius: 15px;
       outline: none;
-      font-size: 16px;
-      background: #1d232d;
+      background: #0d1117;
       color: white;
+      font-size: 16px;
     }
 
     button {
       border: none;
-      border-radius: 14px;
-      padding: 0 16px;
-      font-size: 18px;
-      cursor: pointer;
-      background: #2563eb;
+      border-radius: 15px;
+      min-width: 48px;
+      font-size: 19px;
       color: white;
+      cursor: pointer;
     }
 
     #mic {
-      background: #16a34a;
+      background: #1f6feb;
+    }
+
+    #send {
+      background: #238636;
     }
   </style>
 </head>
 
 <body>
 
-<header>
-  <h1>Ajwad AI 🤖</h1>
-  <p>مساعدك الشخصي</p>
-</header>
+  <header>
+    <h1>Ajwad AI 🤖</h1>
+    <p>مساعدك الشخصي</p>
+  </header>
 
-<div id="chat">
-  <div class="message ai">
-    أهلاً أجود ❤️
+  <div id="chat">
+    <div class="message ai">
+      أهلاً أجود ❤️
+      أنا Ajwad AI.
+      اكتبلي أو اضغط 🎤 واحكي معي.
+    </div>
+  </div>
+
+  <div class="input-area">
+    <button id="mic" type="button">🎤</button>
+
+    <input
+      id="input"
+      type="text"
+      placeholder="اكتب رسالتك هون..."
+      autocomplete="off"
+    >
+
+    <button id="send" type="button">➤</button>
+  </div>
+
+<script>
+
+  const input = document.getElementById("input");
+  const send = document.getElementById("send");
+  const mic = document.getElementById("mic");
+  const chat = document.getElementById("chat");
+
+  function addMessage(text, type) {
+    const message = document.createElement("div");
+
+    message.className = "message " + type;
+    message.textContent = text;
+
+    chat.appendChild(message);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function speak(text) {
+
+    if (!("speechSynthesis" in window)) {
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    const voice = new SpeechSynthesisUtterance(text);
+
+    voice.lang = "ar-SY";
+    voice.rate = 1;
+    voice.pitch = 1;
+
+    window.speechSynthesis.speak(voice);
+  }
+
+  function answer(text) {
+
+    const reply =
+      "وصلتني رسالتك ❤️\n\n" +
+      "أنا حالياً نسخة تجريبية من Ajwad AI، " +
+      "ولسا ما تم ربطّي بنموذج الذكاء الاصطناعي الحقيقي.\n\n" +
+      "بس الواجهة والصوت صاروا جاهزين 🔥";
+
+    addMessage(reply, "ai");
+
+    speak(reply);
+  }
+
+  function sendMessage() {
+
+    const text = input.value.trim();
+
+    if (!text) {
+      return;
+    }
+
+    addMessage(text, "user");
+
+    input.value = "";
+
+    setTimeout(function() {
+      answer(text);
+    }, 400);
+  }
+
+  send.addEventListener("click", sendMessage);
+
+  input.addEventListener("keydown", function(event) {
+
+    if (event.key === "Enter") {
+      sendMessage();
+    }
+
+  });
+
+
+  /* 🎤 التعرف على الصوت */
+
+  const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+  if (SpeechRecognition) {
+
+    const recognition = new SpeechRecognition();
+
+    recognition.lang = "ar-SY";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    mic.addEventListener("click", function() {
+
+      mic.textContent = "🔴";
+
+      try {
+        recognition.start();
+      } catch (error) {
+        console.log(error);
+      }
+
+    });
+
+    recognition.onresult = function(event) {
+
+      const text =
+        event.results[0][0].transcript;
+
+      input.value = text;
+
+      mic.textContent = "🎤";
+
+      sendMessage();
+    };
+
+    recognition.onerror = function() {
+
+      mic.textContent = "🎤";
+
+      alert(
+        "ما قدرت أسمع صوتك.\n" +
+        "تأكد إنك سامح للموقع باستخدام الميكروفون."
+      );
+
+    };
+
+    recognition.onend = function() {
+      mic.textContent = "🎤";
+    };
+
+  } else {
+
+    mic.addEventListener("click", function() {
+
+      alert(
+        "المتصفح عندك ما بيدعم التعرف على الصوت."
+      );
+
+    });
+
+  }
+
+</script>
+
+</body>
+</html>
