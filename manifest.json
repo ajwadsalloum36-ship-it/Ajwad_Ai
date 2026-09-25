@@ -1,0 +1,11 @@
+{
+  "name": "Ajwad AI",
+  "short_name": "Ajwad AI",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0d1117",
+  "theme_color": "#0d1117",
+  "description": "Ajwad AI - مساعدك الشخصي",
+  "lang": "ar",
+  "dir": "rtl"
+}
